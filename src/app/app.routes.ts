@@ -17,7 +17,6 @@ export const routes: Routes = [
     redirectTo: 'trending'
   }]
 },
-
 {
   path:'**',
   redirectTo: 'dashboard'
