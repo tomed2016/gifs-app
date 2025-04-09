@@ -1,6 +1,26 @@
-
+<!--
 <div class="grid grids-col-1 sm:grid-cols-2 grid-cols-2 md:grid-cols-3 gap-4">
   @for (gif of gifs();track gif){
     <gif-list-item [imageUrl]="gif.url" />
   }
+</div> -->
+
+
+
+<div class="h-screen overflow-y-scroll grid grid-cols-2 md:grid-cols-4 gap-4 pt-5"
+  (scroll)="onScroll($event)"
+  #groupDiv
+  >
+  @for (group of gifService.trendingGifGroup(); track $index) {
+    <div class="flex flex-col gap-4">
+      @for (gif of group; track gif.id) {
+        <img
+          class="h-auto max-w-full rounded-lg"
+          [src]="gif.url"
+          [alt]="gif.title"
+        />
+      }
+    </div>
+  }
 </div>
+

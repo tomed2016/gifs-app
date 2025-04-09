@@ -16,7 +16,22 @@ const loadFromLocalStorage = () => {
 export class GifService {
 
   trendingGifs = signal<Gif[]>([]);
-  trendingGifsLoading = signal<boolean>(true);
+  trendingGifsLoading = signal<boolean>(false);
+  privateTrendingPage = signal<number>(0);
+  private trendingPageSize = signal<number>(20);
+  private trendingPageSizeSignal = signal<number>(20);
+//Implemetancion de Masonry
+//[ [Gif, Gif, Gif], [Gif, Gif, Gif], [Gif, Gif, Gif] ]
+trendingGifGroup = computed<Gif[][]>(() => {
+  const groups = [];
+  for (let i = 0; i < this.trendingGifs().length; i += 3) {
+    groups.push(this.trendingGifs().slice(i, i + 3));
+  }
+  console.log(groups);
+  return groups;
+})
+
+
   searchHistory = signal<Record<string, Gif[]>>(loadFromLocalStorage());
   searchHistoryKeys = computed(() => Object.keys(this.searchHistory()));
 
@@ -26,28 +41,37 @@ export class GifService {
   }
 
   loadTrendingGifs() {
+    if (this.trendingGifsLoading()) return;
+    this.privateTrendingPage.update(current => current + 1);
+    this.trendingPageSize.set(this.trendingPageSizeSignal() + 20);
+    this.trendingGifsLoading.set(true);
       this.http.get<GiphyResponse>(`${environment.giphyUrl}/gifs/trending`, {
         params: {
           api_key: environment.giphyApiKey,
-          limit: 20,
+          limit: this.trendingPageSize(),
+          offset: this.privateTrendingPage() * this.trendingPageSizeSignal(),
         },
       })
       .subscribe((response) => {
 
         const gifs = GifMapper.mapGiphyItemsToGifArray(response.data);
-        this.trendingGifs.set(gifs)
+        this.trendingGifs.update(currentGifs => [
+          ... currentGifs,
+          ... gifs
+        ]);
         this.trendingGifsLoading.set(false);
         console.log({gifs});
     });
   }
 
 
-  saarchGif(query: string): Observable<Gif[]> {
+  searchGifs(query: string): Observable<Gif[]> {
     return this.http.get<GiphyResponse>(`${environment.giphyUrl}/gifs/search`, {
       params: {
         api_key: environment.giphyApiKey,
         q: query,
-        limit: 20,
+        limit: this.trendingPageSize(),
+        offset: this.privateTrendingPage() * this.trendingPageSizeSignal(),
       },
     })
     .pipe(
