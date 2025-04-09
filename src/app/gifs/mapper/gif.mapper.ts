@@ -1,5 +1,5 @@
-import { Gif } from "../interfaces/gif.interface";
-import { GiphyItem } from "../interfaces/giphy.interfaces";
+import { Gif } from '../interfaces/gif.interface';
+import { GiphyItem } from './../interfaces/giphy.interfaces';
 
 export class GifMapper {
   static mapGiphyItemToGif(item: GiphyItem): Gif {
@@ -9,6 +9,7 @@ export class GifMapper {
       url: item.images.original.url,
     };
   }
+
   static mapGiphyItemsToGifArray(items: GiphyItem[]): Gif[] {
     return items.map(this.mapGiphyItemToGif);
   }
